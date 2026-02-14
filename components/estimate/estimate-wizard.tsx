@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { type PricingConfig, type VehicleTier, type VehicleType } from "@prisma/client";
+import { UploadButton } from "@uploadthing/react";
 import { Plus, X } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -19,7 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { cancelEstimateAction, saveEstimateDraftAction } from "@/lib/actions/estimate";
-import { UploadButton } from "@/lib/uploadthing-client";
+import { type UploadRouter } from "@/lib/uploadthing";
 import { calculateEstimate } from "@/lib/pricing";
 import { estimateDraftSchema, type EstimateDraftInput } from "@/lib/validation/estimate";
 import { RouteMap } from "@/components/map/route-map";
@@ -530,9 +531,9 @@ export function EstimateWizard({ draft, tiers, config }: EstimateWizardProps) {
               <CardTitle className="text-lg">Photos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <UploadButton
+              <UploadButton<UploadRouter, "bookingPhotos">
                 endpoint="bookingPhotos"
-                onClientUploadComplete={(results) => {
+                onClientUploadComplete={(results: Array<{ url: string }>) => {
                   const existing = form.getValues("photos");
                   form.setValue(
                     "photos",

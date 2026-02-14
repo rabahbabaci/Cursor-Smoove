@@ -10,18 +10,20 @@ import { requireSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { centsToCurrency } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 type BookingDetailPageProps = {
   params: { id: string };
 };
 
-const editableStatuses = new Set([
+const editableStatuses = new Set<BookingStatus>([
   BookingStatus.PENDING_PAYMENT,
   BookingStatus.PENDING_CREW,
   BookingStatus.SCHEDULED,
   BookingStatus.ASSIGNED,
 ]);
 
-const cancellableStatuses = new Set([
+const cancellableStatuses = new Set<BookingStatus>([
   BookingStatus.PENDING_PAYMENT,
   BookingStatus.PENDING_CREW,
   BookingStatus.SCHEDULED,

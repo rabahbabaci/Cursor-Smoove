@@ -6,6 +6,8 @@ import { requireSessionUser } from "@/lib/auth/session";
 import { getPricingConfig, getVehicleTiers } from "@/lib/data/pricing";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 type EstimatePageProps = {
   params: { draftId: string };
 };

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/session";
 import { getVehicleTiers } from "@/lib/data/pricing";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [tiers, user] = await Promise.all([getVehicleTiers(), getSessionUser()]);
 

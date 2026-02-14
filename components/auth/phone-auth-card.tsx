@@ -31,7 +31,7 @@ export function PhoneAuthCard({ nextPath = "/dashboard" }: Props) {
   const resendSeconds = useMemo(() => {
     if (!resendAt) return 0;
     return Math.max(0, Math.ceil((resendAt - clock) / 1000));
-  }, [clock, resendAt, step, loading]);
+  }, [clock, resendAt]);
 
   const sendCode = async (resend = false) => {
     try {

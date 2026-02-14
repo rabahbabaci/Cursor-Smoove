@@ -9,7 +9,7 @@ const bodySchema = z.object({
   reason: z.string().max(240).optional(),
 });
 
-const cancellableStatuses = new Set([
+const cancellableStatuses = new Set<BookingStatus>([
   BookingStatus.PENDING_PAYMENT,
   BookingStatus.PENDING_CREW,
   BookingStatus.SCHEDULED,

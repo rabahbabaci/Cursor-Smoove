@@ -1,6 +1,6 @@
 import Twilio from "twilio";
 
-let twilioClient: Twilio | null = null;
+let twilioClient: ReturnType<typeof Twilio> | null = null;
 
 export function getTwilioClient() {
   if (twilioClient) {

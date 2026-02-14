@@ -34,7 +34,12 @@ function pointAlongStops(stops: Array<{ lat: number; lng: number }>, ratio: numb
 }
 
 function canSimulate(status: BookingStatus) {
-  return ![BookingStatus.DRAFT, BookingStatus.CANCELLED, BookingStatus.COMPLETE].includes(status);
+  const terminalStatuses = new Set<BookingStatus>([
+    BookingStatus.DRAFT,
+    BookingStatus.CANCELLED,
+    BookingStatus.COMPLETE,
+  ]);
+  return !terminalStatuses.has(status);
 }
 
 export async function GET(
