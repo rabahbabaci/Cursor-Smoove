@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING_PAYMENT
+  PENDING_CREW
+  SCHEDULED
+  ASSIGNED
+  EN_ROUTE
+  ARRIVED_PICKUP
+  LOADING
+  IN_TRANSIT
+  ARRIVED_DROPOFF
+  COMPLETE
+  CANCELLED
+}
+
+enum VehicleType {
+  SWIFT
+  FLEX
+  ELEVATE
+  TITAN
+}
+
+enum ScheduleType {
+  ON_DEMAND
+  SCHEDULED
+}
+
+enum TrackingEventType {
+  ASSIGNED
+  EN_ROUTE
+  ARRIVED_PICKUP
+  LOADING
+  IN_TRANSIT
+  ARRIVED_DROPOFF
+  COMPLETE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  EXPIRED
+}
+
+model User {
+  id        String    @id @default(cuid())
+  phone     String    @unique
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model VehicleTier {
+  id                     String      @id @default(cuid())
+  vehicleType            VehicleType @unique
+  name                   String
+  subtitle               String
+  activationFeeCents     Int
+  includedLaborMinutes   Int
+  laborRateCentsPerMin   Int
+  travelRateCentsPerMin  Int
+  mileageRateCentsPerMile Int
+  baseMinutes            Int
+  perItemMinutes         Float
+  heavyMultiplier        Float
+  bulkyMultiplier        Float
+  perStopOverheadMinutes Int
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+}
+
+model PricingConfig {
+  id                               String   @id @default("default")
+  heavyItemFeeCentsPerItem         Int
+  stairsFeeCentsPerFlightPerLocation Int
+  assemblyFeeCentsPerItem          Int
+  serviceFeeBasisPoints            Int
+  taxBasisPoints                   Int
+  updatedAt                        DateTime @updatedAt
+}
+
+model Booking {
+  id                 String       @id @default(cuid())
+  userId             String
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status             BookingStatus @default(DRAFT)
+  vehicleType        VehicleType?
+  scheduleType       ScheduleType?
+  scheduledAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  cancelReason       String?
+  additionalNotes    String?
+  onDemandEtaMin     Int?
+  onDemandEtaMax     Int?
+  routeDistanceMeters Int?
+  routeDurationMinutes Int?
+  subtotalCents      Int?
+  serviceFeeCents    Int?
+  taxCents           Int?
+  totalEstimateCents Int?
+  totalLowCents      Int?
+  totalHighCents     Int?
+  pricingJson        Json?
+  pickupWindowStart  DateTime?
+  pickupWindowEnd    DateTime?
+  stops              Stop[]
+  items              Item[]
+  photos             Photo[]
+  trackingEvents     TrackingEvent[]
+  payments           Payment[]
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+model Stop {
+  id                   String   @id @default(cuid())
+  bookingId            String
+  booking              Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  order                Int
+  addressText          String
+  lat                  Float
+  lng                  Float
+  unit                 String?
+  gateCode             String?
+  parkingNotes         String?
+  stairsFlights        Int      @default(0)
+  contactPhoneOptional String?
+
+  @@index([bookingId, order])
+}
+
+model Item {
+  id               String  @id @default(cuid())
+  bookingId        String
+  booking          Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name             String
+  qty              Int
+  isHeavy          Boolean @default(false)
+  isBulky          Boolean @default(false)
+  requiresAssembly Boolean @default(false)
+  notes            String?
+
+  @@index([bookingId])
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+model TrackingEvent {
+  id          String           @id @default(cuid())
+  bookingId   String
+  booking     Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  type        TrackingEventType
+  payloadJson Json?
+  createdAt   DateTime         @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  stripeSessionId String        @unique
+  status          PaymentStatus
+  amountCents     Int
+  createdAt       DateTime      @default(now())
+
+  @@index([bookingId, status])
+}
